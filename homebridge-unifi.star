@@ -6,19 +6,20 @@ load("hash.star", "hash")
 
 WIDTH = 64
 HEIGHT = 32
-CONFIGURATIONS = {
-    #   column_align,       row_align,          per_row size
-    1: ("center",           "center",           1,      32),
-    2: ("center",           "space_between",    2,      31), # TODO: Center vertically
-    3: ("center",           "space_around",     3,      20),
-    4: ("space_between",    "space_around",     2,      15), # TODO: Center horizontally with gap
-    5: ("space_between",    "space_evenly",     3,      15),
-    6: ("space_between",    "space_evenly",     3,      15),
-    7: ("space_between",    "space_evenly",     4,      15),
-    8: ("space_between",    "space_between",    4,      15),
+
+AVATAR_CONFIGURATIONS = {
+    #   column_align        row_align           per_row size
+    1: ("center",           "center",           1,      HEIGHT),
+    2: ("center",           "space_between",    2,      HEIGHT - 1),
+    3: ("center",           "space_around",     3,      (64 - 2) // 3),
+    4: ("space_between",    "space_evenly",     2,      HEIGHT // 2 - 1),
+    5: ("space_between",    "space_evenly",     3,      HEIGHT // 2 - 1),
+    6: ("space_between",    "space_evenly",     3,      HEIGHT // 2 - 1),
+    7: ("space_between",    "space_evenly",     4,      HEIGHT // 2 - 1),
+    8: ("space_between",    "space_between",    4,      HEIGHT // 2 - 1),
 }
 
-def avatar(url, size=30):
+def avatar(url, size):
     return render.Image(src=image_data(url), height=size, width=size)
 
 def image_data(url):
@@ -69,10 +70,7 @@ def render_client(client, image_size):
         children=[
             render.Padding(
                 pad=(0,0,2,0),
-                child=avatar(
-                    client["image_url"],
-                    size=image_size
-                )
+                child=avatar(client["image_url"], image_size)
             ),
             render.Text(client["owner"])
         ]
@@ -87,10 +85,10 @@ def render_clients(clients, pad_client=(0,0,0,0), image_size=8, scroll_direction
         child=(render.Row if scroll_direction == "horizontal" else render.Column)(
             children=[
                 render.Padding(
-                    pad=pad_client,
+                    pad=((0,0,0,0) if i == len(clients) - 1 else pad_client),
                     child=render_client(client, image_size)
                 )
-                for client in clients
+                for i, client in enumerate(clients)
             ]
         ),
         **kwargs,
@@ -107,7 +105,7 @@ def render_room(room, clients, index, room_count):
                 render_clients(
                     clients,
                     scroll_direction="vertical",
-                    height=32-8-1,
+                    height=HEIGHT-8-1,
                     pad_client=(0,0,0,1),
                     image_size=(10 if len(clients) <= 2 else 8)
                 )
@@ -149,7 +147,11 @@ def main(config):
     AVATARS_ONLY = config.bool("avatars_only")
 
     if not API_URL:
-        fail("Missing API configuration")
+        return render.Root(
+            child=render.Box(
+                child=render.WrappedText("homebridge- unifi API not configured")
+            )
+        )
 
     def get_clients():
         response = http.get(API_URL + "/clients", auth=(USERNAME, PASSWORD))
@@ -172,7 +174,7 @@ def main(config):
         if not image_urls:
             return []
 
-        column_align, row_align, per_row, size = CONFIGURATIONS.get(len(image_urls), CONFIGURATIONS[8])
+        column_align, row_align, per_row, size = AVATAR_CONFIGURATIONS.get(len(image_urls), AVATAR_CONFIGURATIONS[8])
 
         row = []
         rows = [row]
@@ -201,21 +203,16 @@ def main(config):
                 ]
             )
         )
-
     else:
         rooms = clients_by_room(clients)
-
-        rendered_rooms = []
-        i = 0
-        for (room, clients) in rooms:
-            rendered_room = render_room(room, clients, i, len(rooms))
-            rendered_rooms.append(rendered_room)
-            i += 1
 
         return render.Root(
             child=render.Column(
                 expanded=True,
-                children=rendered_rooms
+                children=[
+                    render_room(room, clients, i, len(rooms))
+                    for i, (room, clients) in enumerate(rooms)
+                ]
             )
         )
 
