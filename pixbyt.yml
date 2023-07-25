@@ -1,0 +1,33 @@
+jobs:
+- name: homebridge-unifi
+  tasks:
+  - tap-pixlet--homebridge-unifi target-tidbyt
+- name: homebridge-unifi--webp
+  tasks:
+  - tap-pixlet--homebridge-unifi target-webp
+
+- name: homebridge-unifi--avatars
+  tasks:
+  - tap-pixlet--homebridge-unifi--avatars target-tidbyt
+- name: homebridge-unifi--avatars--webp
+  tasks:
+  - tap-pixlet--homebridge-unifi--avatars target-webp
+
+plugins:
+  extractors:
+  - name: tap-pixlet--homebridge-unifi
+    inherit_from: tap-pixlet
+    config:
+      path: apps/homebridge-unifi
+      app_config:
+        api_url: $HOMEBRIDGE_UNIFI_API_URL # homebridge-unifi-occupancy Web Server URL. If HTTPS, certificate must be valid. Example: 'http://localhost:8582'
+        username: $HOMEBRIDGE_UNIFI_USERNAME
+        password: $HOMEBRIDGE_UNIFI_PASSWORD
+        avatars_only: false # Show a grid of avatars instead of rooms with names
+
+  - name: tap-pixlet--homebridge-unifi--avatars
+    inherit_from: tap-pixlet--homebridge-unifi
+    config:
+      installation_id: homebridge-unifi--avatars
+      app_config:
+        avatars_only: true # Show a grid of avatars instead of rooms with names
