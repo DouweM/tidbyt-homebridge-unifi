@@ -1,6 +1,8 @@
 load("schema.star", "schema")
 load("render.star", "render")
 load("http.star", "http")
+load("encoding/json.star", "json")
+load("pixlib/input.star", "input")
 load("./r.star", "r")
 
 def clients_by_room(clients):
@@ -27,7 +29,15 @@ def main(config):
     API_URL = config.get("api_url")
     USERNAME = config.get("username")
     PASSWORD = config.get("password")
+
     AVATARS_ONLY = config.bool("avatars_only")
+    INPUT = input.json()
+
+    if INPUT:
+        return render.Root(
+            max_age=15000,
+            child=r.event(INPUT)
+        )
 
     if not API_URL:
         return render.Root(
@@ -63,10 +73,9 @@ def main(config):
             return []
 
         return render.Root(child=r.avatars(image_urls))
-    else:
-        rooms = clients_by_room(clients)
 
-        return render.Root(child=r.rooms(rooms))
+    rooms = clients_by_room(clients)
+    return render.Root(child=r.rooms(rooms))
 
 def get_schema():
     return schema.Schema(

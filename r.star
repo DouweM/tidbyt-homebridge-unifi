@@ -15,6 +15,11 @@ r.AVATAR_CONFIGURATIONS = {
     8: ("space_between",    "space_between",    4,      const.HEIGHT // 2 - 1),
 }
 
+def r.event(payload):
+    event = payload["event"]
+    client = payload["client"]
+    return r.client(client, 24, "arrived" if event == "connect" else "left")
+
 def r.avatars(image_urls):
     column_align, row_align, per_row, size = r.AVATAR_CONFIGURATIONS.get(len(image_urls), r.AVATAR_CONFIGURATIONS[8])
 
@@ -108,13 +113,26 @@ def r.clients(clients, pad_client=(0,0,0,0), image_size=8, scroll_direction="hor
         **kwargs,
     )
 
-def r.client(client, image_size):
-    return render.Row(
-        cross_align="center",
-        children=[
-            r.avatar(client["image_url"], image_size, pad=(0,0,2,0)),
-            render.Text(client["owner"] or "Guest")
-        ]
+def r.client(client, image_size, subtitle=None):
+    text = render.Text(client["owner"] or "Guest")
+
+    if subtitle:
+        text = render.Column(
+            children=[
+                text,
+                render.Text(subtitle, color="#bbbbbb")
+            ]
+        )
+
+    return render.Box(
+        child=render.Row(
+            cross_align="center",
+            expanded=True,
+            children=[
+                r.avatar(client["image_url"], image_size, pad=(0,0,2,0)),
+                text
+            ]
+        )
     )
 
 def r.room_name(room, pad=(0,0,0,0)):
