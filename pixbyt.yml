@@ -31,3 +31,4 @@ plugins:
       installation_id: homebridge-unifi--avatars
       app_config:
         avatars_only: true # Show a grid of avatars instead of rooms with names
+        extra_avatar_urls: $HOMEBRIDGE_UNIFI_EXTRA_AVATAR_URLS # Comma-separated list of extra avatar URLs to show in the grid. Example: 'https://example.com/avatar1.png,https://example.com/avatar2.png'

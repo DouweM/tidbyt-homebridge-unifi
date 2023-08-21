@@ -31,6 +31,8 @@ def main(config):
     PASSWORD = config.get("password")
 
     AVATARS_ONLY = config.bool("avatars_only")
+    EXTRA_AVATAR_URLS = config.get("extra_avatar_urls", "").split(",")
+
     INPUT = input.json()
 
     if INPUT:
@@ -69,6 +71,9 @@ def main(config):
             for client in clients
             if client.get("image_url")
         ]
+        if EXTRA_AVATAR_URLS:
+            image_urls.extend(EXTRA_AVATAR_URLS)
+
         if not image_urls:
             return []
 
@@ -105,6 +110,12 @@ def get_schema():
                 desc = "Show a grid of avatars instead of rooms with names",
                 icon = "face-smile",
                 default = False,
+            ),
+            schema.Text(
+                id = "extra_avatar_urls",
+                name = "Extra avatar URLs",
+                desc = "Comma-separated list of extra avatar URLs to show in the grid. Example: 'https://example.com/avatar1.png,https://example.com/avatar2.png'",
+                icon = "key",
             ),
         ],
     )
