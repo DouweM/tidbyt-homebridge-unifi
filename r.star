@@ -91,11 +91,11 @@ def r.room(room, clients, index, room_count):
 
     return render.Row(
         children=[
-            r.room_name(room, pad=(0,0,2,0)),
+            r.room_name(room, pad=(0,0,1,0)),
             r.clients(
                 clients,
                 scroll_direction="horizontal",
-                width=const.WIDTH - len(room) * 5, # Not exact
+                width=const.WIDTH - len(room) * 5 + 1, # Not exact
                 pad_client=(0,0,4,0)
             )
         ]

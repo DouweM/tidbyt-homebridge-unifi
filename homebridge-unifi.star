@@ -5,10 +5,12 @@ load("encoding/json.star", "json")
 load("pixlib/input.star", "input")
 load("./r.star", "r")
 
-def clients_by_room(clients):
+def clients_by_room(clients, room_aliases):
     rooms = {}
     for client in clients:
         room = client["room"]
+        room = room_aliases.get(room, room)
+
         if room not in rooms:
             rooms[room] = []
 
@@ -29,6 +31,13 @@ def main(config):
     API_URL = config.get("api_url")
     USERNAME = config.get("username")
     PASSWORD = config.get("password")
+
+    # Convert ROOM_ALIASES from `key1=value1;key2=value2` to `{"key1": "value1", "key2": "value2"}`
+    ROOM_ALIASES = {
+        alias.split("=")[0]: alias.split("=")[1]
+        for alias
+        in config.get("room_aliases", "").split(";")
+    }
 
     AVATARS_ONLY = config.bool("avatars_only")
     EXTRA_AVATAR_URLS = config.get("extra_avatar_urls", "").split(",")
@@ -79,7 +88,7 @@ def main(config):
 
         return render.Root(child=r.avatars(image_urls))
 
-    rooms = clients_by_room(clients)
+    rooms = clients_by_room(clients, ROOM_ALIASES)
     return render.Root(child=r.rooms(rooms))
 
 def get_schema():
@@ -111,6 +120,7 @@ def get_schema():
                 icon = "face-smile",
                 default = False,
             ),
+            # TODO: room_aliases
             schema.Text(
                 id = "extra_avatar_urls",
                 name = "Extra avatar URLs",

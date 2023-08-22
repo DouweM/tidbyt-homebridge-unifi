@@ -24,6 +24,7 @@ plugins:
         username: $HOMEBRIDGE_UNIFI_USERNAME
         password: $HOMEBRIDGE_UNIFI_PASSWORD
         avatars_only: false # Show a grid of avatars instead of rooms with names
+        room_aliases: $HOMEBRIDGE_UNIFI_ROOM_ALIASES # `<Long>=<Short>` room aliases separated by semicolons. Example: 'Living Room=Living;Rooftop=Roof'
 
   - name: tap-pixlet--homebridge-unifi--avatars
     inherit_from: tap-pixlet--homebridge-unifi
